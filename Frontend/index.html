@@ -153,7 +153,17 @@ button[type="submit"]:hover {
 
 #signup-form { display: none; }
 .error-msg { color: #e74c3c; font-size: 0.9rem; margin-bottom: 10px; display: none; }
+
+/* Mobile */
+@media (max-width: 768px) {
+    .wrapper { flex-direction: column; padding: 30px 20px; }
+    .welcome-section { text-align: center; margin-bottom: 30px; }
+    .brand-row { justify-content: center; }
+}
 </style>
+
+<script src="assets/js/api.js"></script>
+
 </head>
 <body>
 
@@ -207,7 +217,13 @@ button[type="submit"]:hover {
 function toggleForms() {
   const loginForm = document.getElementById('login-form');
   const signupForm = document.getElementById('signup-form');
+  const errLogin = document.getElementById('login-error');
+  const errSignup = document.getElementById('signup-error');
   
+  // Clear errors when switching
+  if(errLogin) errLogin.style.display = 'none';
+  if(errSignup) errSignup.style.display = 'none';
+
   if (loginForm.style.display === 'none') {
     loginForm.style.display = 'block';
     signupForm.style.display = 'none';
@@ -215,9 +231,6 @@ function toggleForms() {
     loginForm.style.display = 'none';
     signupForm.style.display = 'block';
   }
-  // Clear errors
-  document.getElementById('login-error').style.display = 'none';
-  document.getElementById('signup-error').style.display = 'none';
 }
 
 // Handle Login
@@ -227,17 +240,25 @@ document.getElementById('login').addEventListener('submit', async function(e){
   const password = document.getElementById('login-password').value;
   const errBox = document.getElementById('login-error');
 
+  // Submit UI State
+  const btn = e.target.querySelector('button');
+  const originalText = btn.textContent;
+  btn.textContent = "Logging in...";
+  btn.disabled = true;
+
   try {
-    const res = await fetch('/api/auth/login', {
+    // 🟢 2. USE AUTH FETCH (Points to Render automatically)
+    const res = await authFetch('/api/auth/login', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
     });
     
+    if (!res) throw new Error("Connection failed"); // authFetch handles timeouts but returns null on some errors
+
     const data = await res.json();
 
     if (res.ok) {
-      // SUCCESS: Save token and redirect
+      // SUCCESS
       localStorage.setItem('user_token', data.token);
       localStorage.setItem('user_name', data.name);
       localStorage.setItem('user_email', data.email);
@@ -248,8 +269,12 @@ document.getElementById('login').addEventListener('submit', async function(e){
       errBox.style.display = 'block';
     }
   } catch (error) {
-    errBox.textContent = 'Server error. Is the backend running?';
+    console.error(error);
+    errBox.textContent = 'Server not responding. It might be waking up (wait 30s).';
     errBox.style.display = 'block';
+  } finally {
+    btn.textContent = originalText;
+    btn.disabled = false;
   }
 });
 
@@ -261,29 +286,38 @@ document.getElementById('signup').addEventListener('submit', async function(e){
   const password = document.getElementById('signup-password').value;
   const errBox = document.getElementById('signup-error');
 
+  const btn = e.target.querySelector('button');
+  const originalText = btn.textContent;
+  btn.textContent = "Creating...";
+  btn.disabled = true;
+
   try {
-    const res = await fetch('/api/auth/register', {
+    // 🟢 3. USE AUTH FETCH HERE TOO
+    const res = await authFetch('/api/auth/register', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email, password })
     });
     
+    if (!res) throw new Error("Connection failed");
+
     const data = await res.json();
 
     if (res.ok) {
-      // SUCCESS: Save token and redirect
       localStorage.setItem('user_token', data.token);
       localStorage.setItem('user_name', data.name);
       localStorage.setItem('user_email', data.email);
       window.location.href = 'dashboard.html';
     } else {
-      // ERROR
       errBox.textContent = data.message || 'Signup failed';
       errBox.style.display = 'block';
     }
   } catch (error) {
-    errBox.textContent = 'Server error. Is the backend running?';
+    console.error(error);
+    errBox.textContent = 'Server not responding.';
     errBox.style.display = 'block';
+  } finally {
+    btn.textContent = originalText;
+    btn.disabled = false;
   }
 });
 </script>
