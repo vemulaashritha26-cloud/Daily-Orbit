@@ -1,16 +1,15 @@
-// Backend/routes/aiRoutes.js
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const aiController = require("../controllers/aiController");
+const multer = require('multer');
+const { getSuggestions, analyzeImage, getMoodAdvice } = require('../controllers/aiController');
 
-// multer memory storage (for image upload)
-const multer = require("multer");
+// Configure Multer (Store file in RAM)
 const storage = multer.memoryStorage();
-const upload = multer({ storage });
+const upload = multer({ storage: storage });
 
-// Routes
-router.get("/suggestions", aiController.getSuggestions);
-router.post("/mood-advice", express.json(), aiController.getMoodAdvice);
-router.post("/analyze-image", upload.single("image"), aiController.analyzeImage);
+// Define Routes
+router.get('/suggestions', getSuggestions);
+router.post('/analyze-image', upload.single('image'), analyzeImage); // 'image' must match frontend FormData
+router.post('/advice', getMoodAdvice);
 
 module.exports = router;
