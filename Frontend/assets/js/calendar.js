@@ -1,15 +1,15 @@
-/* calendar.js — Rings + Moods (No Flowers) */
+/* calendar.js — Rings + Events/Task Split */
 
 (() => {
   // Configuration
   const EVENT_COLORS = {
-    'Work': '#6366f1',
-    'Meeting': '#3b82f6',
-    'Personal': '#10b981',
-    'Wellness': '#06b6d4',
-    'Errands': '#9ca3af',
-    'Birthday': '#ec4899',
-    'Anniversary': '#f59e0b'
+    'Work': '#6366f1',        // Indigo
+    'Meeting': '#3b82f6',     // Blue
+    'Personal': '#10b981',    // Green
+    'Wellness': '#06b6d4',    // Cyan
+    'Errands': '#9ca3af',     // Gray
+    'Birthday': '#ec4899',    // Pink (Special)
+    'Anniversary': '#f59e0b'  // Gold (Special)
   };
 
   const RECURRING_TYPES = ['Birthday', 'Anniversary'];
@@ -67,6 +67,7 @@
 
   async function loadData() {
     try {
+      // Use authFetch to talk to backend
       const [resTasks, resMoods] = await Promise.all([
         authFetch('/api/tasks'),
         authFetch('/api/moods')
@@ -81,7 +82,7 @@
     } catch (e) { console.error(e); }
   }
 
-  // --- Render Calendar (RINGS + MOOD) ---
+  // --- Render Calendar (RINGS) ---
   function renderWeekHeader(){
     if(!weekHeader) return;
     weekHeader.innerHTML = '';
@@ -121,7 +122,7 @@
       const dayItems = tasks.filter(t => isEventOnDay(t, dateStr));
 
       // --- COLOR LOGIC (Rings) ---
-      let ringColor = 'transparent';
+      let ringColor = 'transparent'; 
       
       if (dayItems.length > 0) {
           const events = dayItems.filter(t => RECURRING_TYPES.includes(t.category));
@@ -139,9 +140,9 @@
           }
       }
 
-      // --- MOOD LOGIC (Emoji) ---
+      // --- MOOD LOGIC ---
       const mood = moods.find(m => m.timestamp.startsWith(dateStr));
-      const moodHTML = mood ? `<div class="day-mood" title="${mood.label}">${mood.emoji}</div>` : '';
+      const moodHTML = mood ? `<div style="position:absolute; top:6px; right:6px; font-size:16px;">${mood.emoji}</div>` : '';
 
       el.innerHTML = `
         ${moodHTML}
@@ -157,7 +158,7 @@
     }
   }
 
-  // --- Sidebar Logic ---
+  // --- Sidebar Logic (Split) ---
   function selectDay(dateStr) {
     selectedDate = dateStr;
     const [y, m, d] = dateStr.split('-').map(Number);
@@ -171,7 +172,7 @@
     const events = dayItems.filter(t => RECURRING_TYPES.includes(t.category));
     const dailyTasks = dayItems.filter(t => !RECURRING_TYPES.includes(t.category));
 
-    // Events
+    // Events Section
     if (events.length > 0) {
         const h = document.createElement('h4');
         h.textContent = "🎉 Special Events";
@@ -180,7 +181,7 @@
         events.forEach(t => renderSidebarItem(t, true));
     }
 
-    // Tasks
+    // Tasks Section
     const h = document.createElement('h4');
     h.textContent = "📝 Daily Tasks";
     h.style.cssText = "margin:15px 0 10px 0;font-size:0.8rem;color:#6366f1;text-transform:uppercase;";
@@ -258,7 +259,6 @@
           eventCategory.value = taskToEdit.category;
           eventPriority.value = taskToEdit.priority;
           eventNotes.value = taskToEdit.notes || "";
-          
           if(taskToEdit.dueDate) {
               const dt = new Date(taskToEdit.dueDate);
               eventDate.value = dt.toISOString().split('T')[0];
