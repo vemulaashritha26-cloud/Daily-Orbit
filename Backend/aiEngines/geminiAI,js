@@ -1,0 +1,73 @@
+// @ts-nocheck
+// Backend/aiEngines/geminiAI.js
+let GoogleGenerativeAI;
+try {
+  GoogleGenerativeAI = require("@google/generative-ai").GoogleGenerativeAI;
+} catch(e) {
+  GoogleGenerativeAI = null;
+}
+
+function ensureModel() {
+  if (!GoogleGenerativeAI) throw new Error("@google/generative-ai not available");
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  if (typeof genAI.getGenerativeModel === "function") return genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  return genAI;
+}
+
+async function gCall(prompt, imagePart) {
+  const model = ensureModel();
+  if (typeof model.generateContent === "function") {
+    const r = await model.generateContent(prompt);
+    if (r?.response?.text) return r.response.text();
+    if (r?.text) return r.text;
+    return JSON.stringify(r);
+  }
+  if (typeof model.generate === "function") {
+    const res = await model.generate({ input: prompt });
+    if (res?.output?.[0]?.content) return res.output.map(o=> o.content || "").join("\n");
+    if (res?.response?.text) return res.response.text();
+    return JSON.stringify(res);
+  }
+  throw new Error("Gemini client has no supported generate method");
+}
+
+module.exports = {
+  async getSuggestions() {
+    const prompt = `Generate 4 actionable task suggestions as a JSON array of objects with keys: title, category, priority.`;
+    const text = await gCall(prompt);
+    const match = text.match(/\[.*\]/s);
+    return match ? JSON.parse(match[0]) : JSON.parse(text);
+  },
+
+  async analyzeImage(filePart) {
+    const prompt = `Analyze facial expression. Return JSON: {"mood":"happy","confidence":0.9,"notes":"..."}; available moods: happy, calm, energetic, stressed, sad, focused, surprised.`;
+    const text = await gCall(prompt, filePart);
+    const m = text.match(/\{[\s\S]*\}/);
+    return m ? JSON.parse(m[0]) : { raw: text };
+  },
+
+  async getMoodAdvice(mood = "calm") {
+    const prompt = `You are a coach. Give 3 short advice items for mood "${mood}". Output JSON array of strings.`;
+    const text = await gCall(prompt);
+    try { return JSON.parse(text); } catch(e) { return text.split("\n").filter(Boolean); }
+  },
+
+  async classifyTask(text) {
+    const prompt = `Classify: "${text}". Output JSON with keys title, category, priority.`;
+    const out = await gCall(prompt);
+    const m = out.match(/\{[\s\S]*\}/);
+    if (m) return JSON.parse(m[0]);
+    throw new Error("Gemini classify parse error");
+  },
+
+  async getSummary(tasks = []) {
+    const prompt = `Summarize: ${JSON.stringify(tasks)}`;
+    const text = await gCall(prompt);
+    return { summary: (text || "").trim() };
+  },
+
+  async getTips() {
+    const text = await gCall("Give 4 short productivity tips as a JSON array of strings.");
+    try { return JSON.parse(text); } catch(e) { return text.split("\n").filter(Boolean); }
+  }
+};

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DailyOrbit — Tasks</title>
+
+  <link rel="stylesheet" href="assets/css/d3.css" />
+  <link rel="stylesheet" href="assets/css/global.css" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <script src="assets/js/authGuard.js"></script>
+  <script src="assets/js/api.js"></script> 
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Sidebar (same structure as dashboard) -->
+    <aside class="sidebar">
+      <div class="logo-section">
+        <img src="assets/logo.png" alt="Daily Orbit Logo" />
+        <span class="app-name">DAILY ORBIT</span>
+      </div>
+
+      <nav>
+        <h3>MENU</h3>
+        <ul>
+          <li><a href="dashboard.html"><span class="material-icons">dashboard</span> Dashboard</a></li>
+          <li><a href="tasks.html" class="active"><span class="material-icons">task</span> Tasks</a></li>
+          <li><a href="mood.html"><span class="material-icons">mood</span> Mood</a></li>
+          <li><a href="calendar.html"><span class="material-icons">calendar_today</span> Calendar</a></li>
+          <li><a href="analytics.html"><span class="material-icons">analytics</span> Analytics</a></li>
+          
+        </ul>
+        <h3>GENERAL</h3>
+        <ul>
+          <li><a href="settings.html"><span class="material-icons">settings</span> Settings</a></li>
+          <li><a href="help.html"><span class="material-icons">help_outline</span> Help</a></li>
+          <li><a href="index.html"><span class="material-icons">logout</span> Logout</a></li>
+        </ul>
+      </nav>
+
+      <div class="download-app glass-card">
+        <img src="assets/logo.png" alt="App Icon" />
+        <p>Download our Mobile app</p>
+        <button>Download</button>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content">
+      <header class="header">
+        <div class="search-bar">
+          <span class="material-icons">search</span>
+          <input id="globalSearch" type="text" placeholder="Search tasks or routines" />
+        </div>
+       <div class="user-profile">
+  <div class="icon-button"><span class="material-icons">mail_outline</span></div>
+  <div class="icon-button"><span class="material-icons">notifications_none</span></div>
+  <div class="user-info">
+    <img src="" alt="User Avatar" id="header-avatar" style="width:40px; height:40px; border-radius:50%;" />
+    <div class="user-details">
+      <div class="name" id="profile-name">Loading...</div>
+      <div class="email" id="profile-email" style="font-size: 0.8rem; color: var(--text-muted);">...</div>
+    </div>
+  </div>
+</div>
+      </header>
+
+      <h1 class="dashboard-title">Tasks</h1>
+      <p class="dashboard-subtitle">Create, edit and manage your daily tasks & routines.</p>
+
+      <section style="padding: 20px 0;">
+          <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;">
+          <div style="display:flex;gap:12px;align-items:center;">
+            <button id="newTaskBtn" class="card-header add-button"><span class="material-icons">add</span> New Task</button>
+            <button id="aiSuggestBtn" class="card-header add-button" title="Get AI suggestions"><span class="material-icons">psychology</span> AI Suggestions</button>
+            <select id="filterCategory" style="padding:10px;border-radius:8px;border:1px solid rgba(107,70,193,0.12);">
+              <option value="all">All categories</option>
+              <option value="Work">Work</option>
+              <option value="Wellness">Wellness</option>
+              <option value="Errands">Errands</option>
+              <option value="Personal">Personal</option>
+            </select>
+            <select id="filterStatus" style="padding:10px;border-radius:8px;border:1px solid rgba(107,70,193,0.12);">
+              <option value="all">All statuses</option>
+              <option value="active">Active</option>
+              <option value="completed">Completed</option>
+            </select>
+            <select id="sortBy" style="padding:10px;border-radius:8px;border:1px solid rgba(107,70,193,0.12);">
+              <option value="created_desc">Sort: Newest</option>
+              <option value="due_asc">Sort: Due (earliest)</option>
+              <option value="priority">Sort: Priority</option>
+              <option value="title">Sort: Title</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;">
+            <label style="display:flex;align-items:center;gap:8px;color:var(--muted-color);font-weight:600;">
+              <input id="selectAll" type="checkbox" style="width:16px;height:16px;" /> Select
+            </label>
+            <button id="bulkComplete" class="start-button">Complete Selected</button>
+            <button id="clearCompleted" class="start-button" style="background:linear-gradient(135deg,#ff7a59,#ff9a76)">Clear Completed</button>
+            <div id="taskCount" style="color:var(--muted-color);font-weight:600;margin-left:12px"> </div>
+          </div>
+        </div>
+
+        <div id="metricsPanel" style="display:flex;gap:18px;margin-top:12px;color:var(--muted-color);font-weight:600;">
+          <div id="metricTotal">Total: 0</div>
+          <div id="metricActive">Active: 0</div>
+          <div id="metricCompleted">Completed: 0</div>
+        </div>
+
+        <!-- AI Suggestions panel (hidden until requested) -->
+        <div id="aiSuggestionsPanel" class="ai-panel glass-card" style="display:none;margin-top:12px;padding:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <strong>AI Suggestions</strong>
+            <div style="display:flex;gap:8px;align-items:center">
+              <label style="display:flex;align-items:center;gap:8px;color:var(--muted-color);font-weight:600;margin-right:8px;">
+                <input id="aiSelectAll" type="checkbox" style="width:16px;height:16px;" /> Select all
+              </label>
+              <button id="acceptSelectedAi" class="add-button">Accept Selected</button>
+              <button id="closeAiPanel" class="icon-button" title="Close"><span class="material-icons">close</span></button>
+            </div>
+          </div>
+          <div id="aiSuggestionsList" style="display:flex;flex-direction:column;gap:8px;max-height:220px;overflow:auto;"></div>
+          <div id="aiSuggestionsFooter" style="margin-top:8px;color:var(--muted-color);font-size:0.9rem;">Tip: Accept suggestions to add them to your tasks.</div>
+        </div>
+
+        <div class="tasks glass-card" style="margin-top:18px;">
+          <div class="card-header">
+            <h3>Daily Tasks</h3>
+          </div>
+
+          <div id="taskList" class="task-list" style="padding:10px 0;"></div>
+          <div id="emptyState" style="padding:30px;text-align:center;color:var(--muted-color);display:none;">
+            <p style="margin:0 0 12px 0;">No tasks yet.</p>
+            <button id="emptyNew" class="add-button">New Task</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Task modal -->
+  <div id="taskModal" class="modal" style="display:none;" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-content glass-card" style="max-width:520px;" role="document">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <h3 id="modalTitle">New Task</h3>
+        <button id="closeModal" class="icon-button"><span class="material-icons">close</span></button>
+      </div>
+
+      <form id="taskForm">
+        <label>Task title</label>
+        <input id="taskTitle" type="text" placeholder="eg. Morning meditation" required />
+
+        <label>Category</label>
+        <select id="taskCategory">
+          <option value="Personal">Personal</option>
+          <option value="Work">Work</option>
+          <option value="Wellness">Wellness</option>
+          <option value="Errands">Errands</option>
+        </select>
+
+        <label>Priority</label>
+        <select id="taskPriority">
+          <option value="low">Low</option>
+          <option value="medium" selected>Medium</option>
+          <option value="high">High</option>
+        </select>
+
+        <label>Frequency</label>
+        <select id="taskFrequency">
+          <option value="once" selected>One-time</option>
+          <option value="daily">Daily (Every Day)</option>
+          <option value="weekly">Weekly (Every Week)</option>
+        </select>
+
+        <label>Due time</label>
+        <input id="taskDue" type="time" />
+
+        <label>Notes</label>
+        <textarea id="taskNotes" rows="3" placeholder="Optional notes"></textarea>
+
+        <div style="display:flex;gap:12px;margin-top:14px;">
+          <button type="submit" class="add-button">Save</button>
+          <button type="button" id="cancelBtn" class="start-button" style="background:rgba(0,0,0,0.06);color:var(--text-light)">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- small inline modal styles -->
+  <style>
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: rgba(10, 20, 40, 0.35);
+      z-index: 9999;
+      padding: 24px;
+    }
+    .modal-content input, .modal-content select, .modal-content textarea {
+      width:100%;
+      padding:10px;
+      border-radius:8px;
+      border:1px solid rgba(107,70,193,0.12);
+      margin-bottom:12px;
+      box-sizing: border-box;
+      font-size:1rem;
+    }
+    .task-item { display:flex; align-items:center; gap:12px; padding:12px; border-radius:10px; margin-bottom:10px; background:rgba(255,255,255,0.06); }
+    .task-item .icon { width:44px; height:44px; border-radius:8px; display:flex; justify-content:center; align-items:center; background:rgba(255,255,255,0.06); }
+    .select-mark { width:18px; height:18px; border-radius:4px; border:1px solid rgba(34,32,52,0.12); display:inline-block; cursor:pointer; margin-right:6px; }
+    .task-item.selected { box-shadow: 0 4px 12px rgba(107,70,255,0.06); border:1px solid rgba(107,70,255,0.08); }
+    .select-mark.selected { background: linear-gradient(135deg,#6b46ff,#b892ff); border-color: rgba(107,70,255,0.14); }
+    .task-item .info { flex:1; }
+    .task-item .name { font-weight:600; font-size:1rem; }
+    .task-item .meta { font-size:0.85rem; color:var(--muted-color); }
+    .badge { padding:6px 10px; border-radius:14px; font-weight:600; font-size:0.85rem; }
+    .badge.low { background: rgba(67,206,162,0.10); color:var(--accent-secondary-dark) }
+    .badge.medium { background: rgba(107,70,255,0.10); color:var(--accent-cyan) }
+    .badge.high { background: rgba(255,122,89,0.08); color:var(--accent-warm) }
+    .task-actions { display:flex; gap:8px; align-items:center; }
+    .checkbox { width:20px; height:20px; border-radius:4px; border:1px solid rgba(34,32,52,0.15); display:inline-block; cursor:pointer; }
+    .task-item.completed { opacity:0.6; text-decoration:line-through; }
+  </style>
+
+  <!-- JS files -->
+  <script src="assets/js/navigation.js"></script>
+  <script src="assets/js/tasks.js"></script>
+</body>
+</html>

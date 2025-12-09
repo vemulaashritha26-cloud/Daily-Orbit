@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Daily Orbit | Analytics</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/d3.css" />
+  <link rel="stylesheet" href="assets/css/global.css" />
+
+  <script src="assets/js/authGuard.js"></script>
+  <script src="assets/js/api.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="dashboard-container">
+    <aside class="sidebar">
+      <div class="logo-section">
+        <img src="assets/logo.png" alt="Daily Orbit Logo" class="logo" onerror="this.style.display='none'">
+        <span class="app-name">DAILY ORBIT</span>
+      </div>
+
+      <nav>
+        <h3>MENU</h3>
+        <ul>
+          <li><a href="dashboard.html"><span class="material-icons">dashboard</span> Dashboard</a></li>
+          <li><a href="tasks.html"><span class="material-icons">task</span> Tasks</a></li>
+          <li><a href="mood.html"><span class="material-icons">mood</span> Mood</a></li>
+          <li><a href="calendar.html"><span class="material-icons">calendar_today</span> Calendar</a></li>
+          <li><a href="analytics.html" class="active"><span class="material-icons">analytics</span> Analytics</a></li>
+        </ul>
+        <h3>GENERAL</h3>
+        <ul>
+          <li><a href="settings.html"><span class="material-icons">settings</span> Settings</a></li>
+          <li><a href="help.html"><span class="material-icons">help_outline</span> Help</a></li>
+          <li><a href="index.html"><span class="material-icons">logout</span> Logout</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <header class="header">
+        <div class="search-bar">
+          <span class="material-icons">search</span>
+          <input id="globalSearch" type="text" placeholder="Search insights..." />
+        </div>
+        <div class="user-profile">
+          <div class="icon-button"><span class="material-icons">mail_outline</span></div>
+          <div class="icon-button"><span class="material-icons">notifications_none</span></div>
+          <div class="user-info">
+            <img src="" alt="User Avatar" id="header-avatar" style="width:40px; height:40px; border-radius:50%;" />
+            <div class="user-details" style="margin-left: 10px;">
+              <div class="name" id="profile-name">Loading...</div>
+              <div class="email" id="profile-email" style="font-size: 0.8rem; color: var(--text-muted);">...</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <h1 class="dashboard-title">Analytics</h1>
+      <p class="dashboard-subtitle">Visualize your productivity and well-being trends.</p>
+
+      <section class="dashboard-grid">
+        <div class="metric-card glass-card">
+          <div class="title">Tasks Completed (30d)</div>
+          <div class="value" id="statCompleted">0</div>
+        </div>
+        <div class="metric-card glass-card">
+          <div class="title">Avg Mood Score</div>
+          <div class="value" id="statAvgMood">0</div>
+        </div>
+        <div class="metric-card glass-card">
+          <div class="title">Consistency</div>
+          <div class="value" id="statConsistency">0%</div>
+        </div>
+      </section>
+
+      <section style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 24px;">
+        
+        <div class="glass-card" style="padding: 24px; display: flex; flex-direction: column;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+            <h3>Mood Trend</h3>
+            <select id="moodRange" style="padding: 4px 8px; border-radius: 6px; border: 1px solid #ddd;">
+              <option value="7">Last 7 Days</option>
+              <option value="30" selected>Last 30 Days</option>
+            </select>
+          </div>
+          <div style="flex: 1; min-height: 250px;">
+            <canvas id="moodTrendChart"></canvas>
+          </div>
+        </div>
+
+        <div class="glass-card" style="padding: 24px; display: flex; flex-direction: column;">
+          <h3>Mood Distribution</h3>
+          <div style="flex: 1; min-height: 200px; position: relative;">
+            <canvas id="moodDistChart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <section style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+        
+        <div class="glass-card" style="padding: 24px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+            <h3>Tasks by Category</h3>
+            <select id="taskRange" style="padding: 4px 8px; border-radius: 6px; border: 1px solid #ddd;">
+              <option value="30">Last 30 Days</option>
+              <option value="90">Last 90 Days</option>
+            </select>
+          </div>
+          <div style="height: 200px;">
+            <canvas id="tasksCategoryChart"></canvas>
+          </div>
+        </div>
+
+        <div class="glass-card" style="padding: 24px;">
+          <h3>AI Insights</h3>
+          <ul id="insightsList" style="margin-top: 16px; list-style-type: disc; padding-left: 20px; line-height: 1.6; color: var(--text-muted);">
+            <li>Loading insights...</li>
+          </ul>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <script src="assets/js/navigation.js"></script>
+  <script src="assets/js/analytics.js"></script>
+</body>
+</html>

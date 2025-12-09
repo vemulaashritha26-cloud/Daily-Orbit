@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Daily Orbit - Dashboard</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/css/d3.css" />
+    <link rel="stylesheet" href="assets/css/global.css" />
+
+    <script src="assets/js/authGuard.js"></script>
+    <script src="assets/js/api.js"></script>
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <aside class="sidebar">
+        <div class="logo-section">
+          <img src="assets/logo.png" alt="Daily Orbit Logo" class="logo" onerror="this.style.display='none'">
+          <span class="app-name">DAILY ORBIT</span>
+        </div>
+        <nav>
+          <h3>MENU</h3>
+          <ul>
+            <li><a href="dashboard.html" class="active"><span class="material-icons">dashboard</span> Dashboard</a></li>
+            <li><a href="tasks.html"><span class="material-icons">task</span> Tasks</a></li>
+            <li><a href="mood.html"><span class="material-icons">mood</span> Mood</a></li>
+            <li><a href="calendar.html"><span class="material-icons">calendar_today</span> Calendar</a></li>
+            <li><a href="analytics.html"><span class="material-icons">analytics</span> Analytics</a></li>
+          </ul>
+           <h3>GENERAL</h3>
+        <ul>
+          <li><a href="settings.html"><span class="material-icons">settings</span> Settings</a></li>
+          <li><a href="help.html"><span class="material-icons">help_outline</span> Help</a></li>
+          <li><a href="index.html"><span class="material-icons">logout</span> Logout</a></li>
+        </ul>
+        </nav>
+      </aside>
+
+      <main class="main-content">
+        <header class="header">
+          <div class="search-bar">
+            <span class="material-icons">search</span>
+            <input type="text" placeholder="Search..." />
+          </div>
+          <div class="user-profile">
+            <div class="user-info">
+              <img src="" alt="User Avatar" id="header-avatar" style="width:40px; height:40px; border-radius:50%;" />
+              <div class="user-details" style="margin-left: 10px;">
+                <div class="name" id="profile-name">Loading...</div>
+                <div class="email" id="profile-email" style="font-size: 0.8rem; color: var(--text-muted);">...</div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <section class="abstract-section" style="margin-bottom: 40px; max-width: 800px;">
+          <h1 class="dashboard-title">Welcome to Your Orbit</h1>
+          <p class="dashboard-subtitle" style="line-height: 1.6; color: var(--text-muted);">
+            <strong>Daily Orbit</strong> is an emotion-aware planner designed to align your productivity with your well-being. 
+            Unlike traditional to-do lists, we help you track not just <em>what</em> you get done, but <em>how you feel</em> doing it. 
+            Use this dashboard to visualize your progress, monitor your mood trends, and maintain a healthy work-life balance.
+          </p>
+        </section>
+
+        <section class="dashboard-grid">
+          <div class="metric-card glass-card">
+            <div class="title">Total Tasks</div>
+            <div class="value" id="val-total">0</div>
+          </div>
+          <div class="metric-card glass-card">
+            <div class="title">Completed</div>
+            <div class="value" id="val-completed" style="color: #43cea2;">0</div>
+          </div>
+          <div class="metric-card glass-card">
+            <div class="title">Active</div>
+            <div class="value" id="val-active" style="color: #6b46ff;">0</div>
+          </div>
+          <div class="metric-card glass-card">
+            <div class="title">Completion Rate</div>
+            <div class="value" id="val-rate">0%</div>
+          </div>
+        </section>
+
+        <section class="dashboard-content-area">
+          
+          <div class="tasks glass-card grid-area-3">
+            <div class="card-header">
+              <h3>Recent Tasks</h3>
+              <a href="tasks.html" class="add-button"><span class="material-icons">list</span> View All</a>
+            </div>
+            <div class="task-list" id="dashboard-task-list">
+              <p style="color:var(--text-muted); padding:10px;">Loading tasks...</p>
+            </div>
+          </div>
+
+          <div class="mood-insights glass-card grid-area-4">
+            <div class="card-header">
+              <h3>Recent Moods</h3>
+              <a href="mood.html" class="add-button"><span class="material-icons">add</span> Log</a>
+            </div>
+            <div class="mood-list" id="dashboard-mood-list">
+               <p style="color:var(--text-muted); padding:10px;">Loading moods...</p>
+            </div>
+          </div>
+
+          <div class="time-tracker glass-card grid-area-6">
+            <div class="card-header">
+              <h3>Time Tracker</h3>
+            </div>
+            <div class="timer-display" style="font-size: 2.5rem; font-weight: 700; text-align: center; padding: 20px 0; font-variant-numeric: tabular-nums;">
+              00:00:00
+            </div>
+            <div class="controls" style="text-align: center; padding-bottom: 20px;">
+              <button class="stop icon-button" style="font-size: 24px;"><span class="material-icons">stop</span></button>
+              <button class="play icon-button" style="font-size: 24px; color: var(--primary-color);"><span class="material-icons">play_circle_filled</span></button>
+              <button class="pause icon-button" style="font-size: 24px; display: none;"><span class="material-icons">pause_circle_filled</span></button>
+            </div>
+          </div>
+
+        </section>
+      </main>
+    </div>
+
+    <script src="assets/js/navigation.js"></script>
+    <script src="assets/js/dashboard.js"></script>
+  </body>
+</html>

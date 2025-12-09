@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DailyOrbit — Settings</title>
+  <link rel="stylesheet" href="assets/css/d3.css" />
+  <link rel="stylesheet" href="assets/css/global.css" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <script src="assets/js/authGuard.js"></script>
+  <script src="assets/js/api.js"></script>
+</head>
+<body>
+  <div class="dashboard-container">
+    <aside class="sidebar">
+      <div class="logo-section">
+        <img src="assets/logo.png" alt="Daily Orbit Logo" />
+        <span class="app-name">DAILY ORBIT</span>
+      </div>
+      <nav>
+        <h3>MENU</h3>
+        <ul>
+          <li><a href="dashboard.html"><span class="material-icons">dashboard</span> Dashboard</a></li>
+          <li><a href="tasks.html"><span class="material-icons">task</span> Tasks</a></li>
+          <li><a href="mood.html"><span class="material-icons">mood</span> Mood</a></li>
+          <li><a href="calendar.html"><span class="material-icons">calendar_today</span> Calendar</a></li>
+          <li><a href="analytics.html"><span class="material-icons">analytics</span> Analytics</a></li>
+        </ul>
+        <h3>GENERAL</h3>
+        <ul>
+          <li><a href="settings.html" class="active"><span class="material-icons">settings</span> Settings</a></li>
+          <li><a href="help.html"><span class="material-icons">help_outline</span> Help</a></li>
+          <li><a href="index.html"><span class="material-icons">logout</span> Logout</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <header class="header">
+        <h1 class="dashboard-title">Settings</h1>
+        <div class="user-profile">
+            <img src="" alt="User Avatar" id="header-avatar" style="width:40px; height:40px; border-radius:50%;" />
+            <div class="user-details" style="margin-left: 10px;">
+              <div class="name" id="profile-name">Loading...</div>
+              <div class="email" id="profile-email" style="font-size: 0.8rem; color: var(--text-muted);">...</div>
+            </div>
+        </div>
+      </header>
+
+      <div style="max-width: 600px;">
+        <section class="glass-card" style="padding: 24px; margin-bottom: 24px;">
+          <h3 style="margin-top:0">Profile Settings</h3>
+          <form id="profileForm">
+            <div style="margin-bottom: 16px;">
+              <label style="display:block; margin-bottom:8px; font-weight:600;">Full Name</label>
+              <input type="text" id="settingName" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd;" />
+            </div>
+            <div style="margin-bottom: 16px;">
+              <label style="display:block; margin-bottom:8px; font-weight:600;">Email Address</label>
+              <input type="email" id="settingEmail" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd;" />
+            </div>
+            <div style="margin-bottom: 16px;">
+              <label style="display:block; margin-bottom:8px; font-weight:600;">New Password (Optional)</label>
+              <input type="password" id="settingPassword" placeholder="Leave blank to keep current" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd;" />
+            </div>
+            <button type="submit" class="add-button">Update Profile</button>
+          </form>
+        </section>
+
+        <section class="glass-card" style="padding: 24px; margin-bottom: 24px;">
+          <h3 style="margin-top:0">Data Management</h3>
+          <p style="color: var(--text-muted); margin-bottom: 16px;">Download a copy of your personal data (Tasks & Moods).</p>
+          <button id="exportDataBtn" class="start-button">Export JSON Data</button>
+        </section>
+
+        <section class="glass-card" style="padding: 24px; border: 1px solid #ffcccc; background: #fff5f5;">
+          <h3 style="margin-top:0; color: #e53e3e;">Danger Zone</h3>
+          <p style="color: #e53e3e; margin-bottom: 16px;">Once you delete your account, there is no going back.</p>
+          <button id="deleteAccountBtn" style="background: #e53e3e; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">Delete Account</button>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script src="assets/js/navigation.js"></script>
+  <script src="assets/js/settings.js"></script>
+</body>
+</html>
