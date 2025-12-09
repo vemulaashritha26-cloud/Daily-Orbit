@@ -1,7 +1,23 @@
-/* mood.js — Debug Version */
+/* mood.js — Live Production Fixed */
 
 (() => {
-  console.log("🚀 Mood Script Loaded"); // Check console for this!
+  // 🟢 SMART SERVER URL DETECTION
+  // If we are on localhost, use local server. Otherwise, use Render.
+  const IS_LOCAL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+  const API_BASE = IS_LOCAL 
+      ? "http://localhost:3000" 
+      : "https://dailyorbit-backend-umlt.onrender.com";
+
+  // Data
+  const MOODS = [
+    { id: "happy", emoji: "😊", label: "Happy", color: "#FFD166" },
+    { id: "calm", emoji: "😌", label: "Calm", color: "#A8E6CF" },
+    { id: "energetic", emoji: "⚡️", label: "Energetic", color: "#FFAA00" },
+    { id: "stressed", emoji: "😩", label: "Stressed", color: "#FF8A65" },
+    { id: "sad", emoji: "😔", label: "Sad", color: "#90A4AE" },
+    { id: "focused", emoji: "🧐", label: "Focused", color: "#C5CAE9" },
+    { id: "surprised", emoji: "😲", label: "Surprised", color: "#F8BBD0" }
+  ];
 
   // DOM Elements
   const emojiGrid = document.getElementById("emojiGrid");
@@ -16,35 +32,19 @@
   const suggestionsList = document.getElementById("suggestionsList");
   const applySuggestionBtn = document.getElementById("applySuggestionBtn");
   
-  // Image Elements
   const imageInput = document.getElementById("imageInput");
   const analyzeImageBtn = document.getElementById("analyzeImageBtn");
   const imagePreview = document.getElementById("imagePreview");
   const previewImg = document.getElementById("previewImg");
   const analyzeStatus = document.getElementById("analyzeStatus");
 
-  // Chart
   const trendCtx = document.getElementById("trendChart")?.getContext("2d");
-
-  // Verify Elements exist
-  if (!analyzeImageBtn) console.error("❌ Error: Button 'analyzeImageBtn' not found in HTML");
-  if (!imageInput) console.error("❌ Error: Input 'imageInput' not found in HTML");
-
-  // Data
-  const MOODS = [
-    { id: "happy", emoji: "😊", label: "Happy", color: "#FFD166" },
-    { id: "calm", emoji: "😌", label: "Calm", color: "#A8E6CF" },
-    { id: "energetic", emoji: "⚡️", label: "Energetic", color: "#FFAA00" },
-    { id: "stressed", emoji: "😩", label: "Stressed", color: "#FF8A65" },
-    { id: "sad", emoji: "😔", label: "Sad", color: "#90A4AE" },
-    { id: "focused", emoji: "🧐", label: "Focused", color: "#C5CAE9" },
-    { id: "surprised", emoji: "😲", label: "Surprised", color: "#F8BBD0" }
-  ];
-
+  let trendChart = null;
   let selectedMood = null;
   let moods = [];
 
-  // --- 1. Load Data ---
+  // --- API Functions ---
+
   async function loadMoods() {
     try {
       const res = await authFetch('/api/moods');
@@ -53,33 +53,27 @@
         renderHistory();
         if(trendCtx) updateTrendChart();
       }
-    } catch (e) { console.error(e); }
+    } catch (e) { console.error("Failed to load moods:", e); }
   }
 
-  // --- 2. Image Analysis (The Part you are fixing) ---
+  // --- Image Analysis (THE FIX IS HERE) ---
   async function handleImageAnalysis() {
-    console.log("🖱️ Analyze Button Clicked");
-
     const file = imageInput.files[0];
     if (!file) {
       alert("Please select an image first.");
       return;
     }
 
-    if(analyzeStatus) analyzeStatus.textContent = "Analyzing... (Please wait)";
+    if(analyzeStatus) analyzeStatus.textContent = "Analyzing... (Connecting to Cloud)";
     
-    // 1. Prepare Data
     const fd = new FormData();
     fd.append('image', file);
 
     try {
       const token = localStorage.getItem('user_token');
       
-      // 2. Send Request
-      console.log("📡 Sending request to /api/ai/analyze-image...");
-      
-      // Use standard fetch to let browser handle multipart headers
-      const res = await fetch('/api/ai/analyze-image', { 
+      // 🟢 USE THE FULL URL WE DEFINED AT THE TOP
+      const res = await fetch(`${API_BASE}/api/ai/analyze-image`, { 
         method: 'POST',
         headers: {
             'Authorization': `Bearer ${token}`
@@ -87,12 +81,9 @@
         body: fd 
       });
       
-      console.log("U+1F4E1 Response Status:", res.status);
-
       if (!res.ok) throw new Error(`Server Error: ${res.status}`);
 
       const data = await res.json();
-      console.log("📦 Data received:", data);
       
       if (data.mood) {
         if(analyzeStatus) analyzeStatus.textContent = `Detected: ${data.mood} (${Math.round(data.confidence * 100)}%)`;
@@ -108,13 +99,15 @@
     }
   }
 
-  // --- 3. UI Helpers ---
+  // --- UI Logic ---
+
   function buildEmojiGrid() {
     if(!emojiGrid) return;
     MOODS.forEach(m => {
       const b = document.createElement("button");
       b.className = "mood-btn";
       b.dataset.mood = m.id;
+      b.title = m.label;
       b.innerHTML = `${m.emoji} <div style="font-size:12px;color:var(--muted-color);margin-top:6px">${m.label}</div>`;
       b.addEventListener("click", () => selectMood(m.id));
       emojiGrid.appendChild(b);
@@ -136,7 +129,6 @@
     if(selectedMoodLabel) selectedMoodLabel.textContent = m.label + (source === "image" ? " (Analyzed)" : "");
     if(selectedMoodTime) selectedMoodTime.textContent = new Date().toLocaleString();
     
-    // Fetch Advice
     fetchMoodAdvice(moodId);
   }
 
@@ -164,19 +156,33 @@
   }
 
   function handleSaveClick() {
-    if (!selectedMood) return alert("Select a mood first.");
+    if (!selectedMood) return alert("Please select a mood first.");
     const notes = moodNotes.value.trim();
-    saveMoodToAPI({ mood: selectedMood.id, emoji: selectedMood.emoji, notes });
+    saveMoodToAPI({
+      mood: selectedMood.id,
+      emoji: selectedMood.emoji,
+      notes: notes
+    });
     moodNotes.value = "";
   }
 
   async function saveMoodToAPI(entry) {
+    try {
       await authFetch('/api/moods', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(entry)
       });
       loadMoods();
+    } catch (e) { alert("Error saving mood"); }
+  }
+
+  async function clearMoodsAPI() {
+    if (!confirm("Clear all mood history?")) return;
+    try {
+      await authFetch('/api/moods', { method: 'DELETE' });
+      loadMoods();
+    } catch (e) { console.error(e); }
   }
 
   function previewImage(file) {
@@ -190,42 +196,83 @@
 
   function renderHistory() {
     if(!moodHistoryEl) return;
+    if (!moods.length) {
+      moodHistoryEl.innerHTML = `<div style="color:var(--muted-color)">No moods logged yet.</div>`;
+      return;
+    }
     moodHistoryEl.innerHTML = moods.map(m => `
-        <div class="mood-item" style="display:flex; gap:10px; padding:8px; border-bottom:1px solid #eee;">
-            <div style="font-size:20px;">${m.emoji}</div>
-            <div>
-                <strong>${m.mood}</strong>
-                <div style="font-size:0.8rem; color:#888;">${new Date(m.timestamp).toLocaleTimeString()}</div>
+        <div class="mood-item" style="display:flex; align-items:center; gap:10px; padding:8px 6px; border-bottom:1px solid rgba(0,0,0,0.05);">
+            <div style="font-size:22px">${m.emoji}</div>
+            <div style="flex:1">
+                <div style="font-weight:700">${m.mood}</div>
+                <div style="font-size:0.9rem;color:var(--muted-color)">${m.notes || ""}</div>
             </div>
+            <div style="font-size:0.75rem;color:var(--muted-color)">${new Date(m.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
         </div>
     `).join('');
   }
 
   function updateTrendChart() {
-      // Basic Chart Logic
-      if(!trendChart && trendCtx && Chart) {
-          trendChart = new Chart(trendCtx, {
-            type: 'line',
-            data: { labels: [], datasets: [{ label: 'Mood', data: [] }] }
+    const lastSeven = moods.slice(0, 7).reverse();
+    const labels = lastSeven.map(m => new Date(m.timestamp).toLocaleDateString(undefined, {weekday:'short'}));
+    const mapping = MOODS.reduce((acc, x, i) => { acc[x.id] = i + 1; return acc; }, {});
+    const data = lastSeven.map(m => mapping[m.mood] || 1);
+
+    if (!trendChart && trendCtx && Chart) {
+      trendChart = new Chart(trendCtx, {
+        type: "line",
+        data: {
+          labels,
+          datasets: [{
+            label: "Mood Level",
+            data,
+            tension: 0.4,
+            borderColor: '#6b46ff',
+            backgroundColor: 'rgba(107, 70, 255, 0.1)',
+            borderWidth: 2,
+            pointRadius: 4,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { y: { display: false, min: 0, max: 8 }, x: { grid: { display: false } } }
+        }
+      });
+    } else if (trendChart) {
+      trendChart.data.labels = labels;
+      trendChart.data.datasets[0].data = data;
+      trendChart.update();
+    }
+  }
+
+  function init() {
+    buildEmojiGrid();
+    if(saveMoodBtn) saveMoodBtn.addEventListener("click", handleSaveClick);
+    if(clearMoodsBtn) clearMoodsBtn.addEventListener("click", clearMoodsAPI);
+    
+    if(imageInput) imageInput.addEventListener("change", (e) => {
+      if (e.target.files && e.target.files[0]) previewImage(e.target.files[0]);
+    });
+    
+    if(analyzeImageBtn) analyzeImageBtn.addEventListener("click", handleImageAnalysis);
+
+    if(applySuggestionBtn) applySuggestionBtn.addEventListener("click", async () => {
+      const text = suggestionsList.querySelector("li")?.textContent;
+      if (text) {
+        try {
+          await authFetch('/api/tasks', {
+            method: 'POST',
+            body: JSON.stringify({ title: text, category: 'Wellness', priority: 'medium', status: 'active' })
           });
+          alert("Suggestion added to your Tasks!");
+        } catch(e) { console.error(e); }
       }
+    });
+
+    loadMoods();
   }
 
-  // --- INIT ---
-  buildEmojiGrid();
-  loadMoods();
-
-  if(saveMoodBtn) saveMoodBtn.addEventListener("click", handleSaveClick);
-  
-  if(imageInput) imageInput.addEventListener("change", (e) => {
-    if (e.target.files && e.target.files[0]) previewImage(e.target.files[0]);
-  });
-  
-  if(analyzeImageBtn) {
-      console.log("✅ Button Listener Attached");
-      analyzeImageBtn.addEventListener("click", handleImageAnalysis);
-  } else {
-      console.error("❌ Button Listener FAILED");
-  }
-
+  init();
 })();
