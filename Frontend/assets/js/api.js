@@ -1,7 +1,10 @@
-/* api.js - Connected to Live Render Backend */
+/* api.js - Local Development Mode */
 
-// 🟢 YOUR LIVE BACKEND URL
-const API_BASE_URL = "https://dailyorbit-backend-umlt.onrender.com";
+// 🟢 ACTIVE: Pointing to Localhost
+const API_BASE_URL = "http://localhost:3000";
+
+// 🔴 INACTIVE: Live Render Backend (Uncomment this when deploying)
+// const API_BASE_URL = "https://dailyorbit-backend-umlt.onrender.com";
 
 window.authFetch = async function(endpoint, options = {}) {
   const token = localStorage.getItem('user_token');
@@ -18,7 +21,7 @@ window.authFetch = async function(endpoint, options = {}) {
   }
 
   try {
-    // 🔗 COMBINE BASE URL + ENDPOINT (e.g. https://.../api/tasks)
+    // 🔗 COMBINE BASE URL + ENDPOINT
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,
       headers
@@ -38,7 +41,7 @@ window.authFetch = async function(endpoint, options = {}) {
 
   } catch (error) {
     console.error("API Request Failed:", error);
-    alert("Could not connect to the server. It might be waking up (Render takes 30s).");
+    alert("Could not connect to the server. Ensure 'node server.js' is running.");
     throw error;
   }
 };

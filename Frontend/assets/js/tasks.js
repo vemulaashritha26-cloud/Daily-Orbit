@@ -1,4 +1,4 @@
-/* tasks.js — Now supports Frequency (Daily/Weekly) */
+/* tasks.js — Connected to Backend & Filters Events */
 
 (() => {
   // Elements
@@ -47,7 +47,7 @@
       document.getElementById("taskTitle").value = editTask.title;
       document.getElementById("taskCategory").value = editTask.category || "Personal";
       document.getElementById("taskPriority").value = editTask.priority || "medium";
-      document.getElementById("taskFrequency").value = editTask.frequency || "once"; // Set Frequency
+      document.getElementById("taskFrequency").value = editTask.frequency || "once"; 
       
       if (editTask.dueDate) {
           const d = new Date(editTask.dueDate);
@@ -59,7 +59,7 @@
       modalTitle.textContent = "New Task";
       editId = null;
       taskForm.reset();
-      document.getElementById("taskFrequency").value = "once"; // Default
+      document.getElementById("taskFrequency").value = "once"; 
     }
   }
 
@@ -87,7 +87,7 @@
       title,
       category: document.getElementById("taskCategory").value,
       priority: document.getElementById("taskPriority").value,
-      frequency: document.getElementById("taskFrequency").value, // Capture Frequency
+      frequency: document.getElementById("taskFrequency").value,
       dueDate: finalDate,
       notes: document.getElementById("taskNotes").value,
       status: 'active'
@@ -178,7 +178,6 @@
       
       const timeStr = task.dueDate ? new Date(task.dueDate).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
       
-      // Show Repeat Icon if Daily/Weekly
       let repeatIcon = '';
       if(task.frequency === 'daily') repeatIcon = '<span title="Daily" class="material-icons" style="font-size:14px; margin-left:6px; color:#6b7280;">repeat</span>';
       if(task.frequency === 'weekly') repeatIcon = '<span title="Weekly" class="material-icons" style="font-size:14px; margin-left:6px; color:#6b7280;">event_repeat</span>';
@@ -215,19 +214,22 @@
     return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   }
 
-  // --- AI Suggestions ---
+  // --- AI Suggestions (Fixed Syntax) ---
   if (aiSuggestBtn) {
     aiSuggestBtn.addEventListener('click', async () => {
         aiPanel.style.display = 'block';
         aiList.innerHTML = '<div style="color:var(--muted-color)">Asking AI...</div>';
         try {
-            const res = await authFetch('/api/ai/suggestions');
+            // FIX: Using authFetch correctly here
+            const res = await authFetch('/api/ai/suggestions'); 
             const suggestions = await res.json();
+            
             aiList.innerHTML = '';
             suggestions.forEach(s => {
                 const row = document.createElement('div');
                 row.style.cssText = "display:flex; justify-content:space-between; padding:8px; border-bottom:1px solid rgba(255,255,255,0.1);";
                 row.innerHTML = `<div><strong>${s.title}</strong><br><small>${s.category} • ${s.priority}</small></div> <button class="add-button" style="padding:4px 8px; font-size:0.8rem;">Add</button>`;
+                
                 row.querySelector('button').addEventListener('click', async () => {
                     await authFetch('/api/tasks', {
                         method: 'POST',
@@ -238,7 +240,7 @@
                 });
                 aiList.appendChild(row);
             });
-        } catch (e) { aiList.innerHTML = 'Error loading suggestions.'; }
+        } catch (e) { aiList.innerHTML = 'Error loading suggestions.'; console.error(e); }
     });
   }
   if (closeAiPanel) closeAiPanel.addEventListener('click', () => aiPanel.style.display = 'none');
