@@ -1,10 +1,10 @@
 /* api.js - Local Development Mode */
 
-// 🟢 ACTIVE: Pointing to Localhost
-const API_BASE_URL = "http://localhost:3000";
+// 🟢 ACTIVE: Point to Render (Cloud)
+const API_BASE_URL = "https://dailyorbit-backend-umlt.onrender.com";
 
-// 🔴 INACTIVE: Live Render Backend (Uncomment this when deploying)
-// const API_BASE_URL = "https://dailyorbit-backend-umlt.onrender.com";
+// 🔴 INACTIVE: Local Development
+// const API_BASE_URL = "http://localhost:3000";
 
 window.authFetch = async function(endpoint, options = {}) {
   const token = localStorage.getItem('user_token');
