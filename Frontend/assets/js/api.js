@@ -1,15 +1,18 @@
-/* api.js - Local Development Mode */
+/* api.js — Smart Auto-Detection */
 
-// 🟢 ACTIVE: Point to Render (Cloud)
-const API_BASE_URL = "https://dailyorbit-backend-umlt.onrender.com";
+// 🟢 AUTOMATICALLY DETECT SERVER
+// If browser says "localhost" or "127.0.0.1", use Local server. Otherwise, use Render.
+const IS_LOCAL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 
-// 🔴 INACTIVE: Local Development
-// const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = IS_LOCAL 
+    ? "http://localhost:3000" 
+    : "https://dailyorbit-backend-umlt.onrender.com";
+
+console.log(`🔌 API connecting to: ${API_BASE_URL}`);
 
 window.authFetch = async function(endpoint, options = {}) {
   const token = localStorage.getItem('user_token');
   
-  // Create Headers
   const headers = {
     'Content-Type': 'application/json',
     ...options.headers
@@ -41,7 +44,10 @@ window.authFetch = async function(endpoint, options = {}) {
 
   } catch (error) {
     console.error("API Request Failed:", error);
-    alert("Could not connect to the server. Ensure 'node server.js' is running.");
+    // Only alert if we are clearly failing to connect
+    if (IS_LOCAL) {
+        alert("Could not connect to Local Server. Is 'node server.js' running?");
+    }
     throw error;
   }
 };
